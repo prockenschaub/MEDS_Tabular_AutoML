@@ -4,7 +4,15 @@ This is an example of how to extract a MEDS dataset from MIMIC-IV. All scripts i
 be run **not** from this directory but from the root directory of this entire repository (e.g., one directory
 up from this one).
 
-For this tutorial make sure you are cd'd into the root directory of the repository.
+For this tutorial make sure you are cd'd into the root directory of the repository and have the following environment variables set.
+
+```console
+export ROOT_DIR=???                                           # set to the directory in which you want to store all data
+export MIMICIV_MEDS_COHORT_DIR=${ROOT_DIR}/meds/              # set to the directory in which you want to store the raw MIMIC-IV data
+export OUTPUT_TABULARIZATION_DIR=${ROOT_DIR}/meds_tab/        # set to the output directory for the tabularized data
+export OUTPUT_MODEL_DIR=${OUTPUT_TABULARIZATION_DIR}/results/ # set to the base results directory
+```
+
 
 ## Extract MIMIC-IV MEDS Data
 
@@ -15,11 +23,6 @@ To get MEDS data, we can either download pre-extracted data and tasks from gcp (
 Install the [gcloud client](https://cloud.google.com/sdk/docs/install) and then run the following command to download the MEDS data from the gcp bucket:
 
 ```console
-export ROOT_DIR=??? # set to the directory in which you want to store all data
-export MIMICIV_MEDS_COHORT_DIR=${ROOT_DIR}/meds/ # set to the directory in which you want to store the raw MIMIC-IV data
-export OUTPUT_TABULARIZATION_DIR=${ROOT_DIR}/meds_tab/ # set to the output directory for the tabularized data
-export OUTPUT_MODEL_DIR=${OUTPUT_TABULARIZATION_DIR}/results/ # set to the base results directory
-
 cd $MIMICIV_MEDS_COHORT_DIR
 gcloud storage cp gs://ehr_standardization_schema/MEDS_Extract_v0.0.7_test.zip meds_extract_0.0.7_data.zip
 unzip meds_extract_0.0.7_data.zip
