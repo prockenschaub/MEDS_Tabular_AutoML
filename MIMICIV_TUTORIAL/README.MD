@@ -16,11 +16,11 @@ Install the [gcloud client](https://cloud.google.com/sdk/docs/install) and then 
 
 ```console
 export ROOT_DIR=??? # set to the directory in which you want to store all data
-export MIMICIV_MEDS_DIR=${ROOT_DIR}/meds/ # set to the directory in which you want to store the raw MIMIC-IV data
+export MIMICIV_MEDS_COHORT_DIR=${ROOT_DIR}/meds/ # set to the directory in which you want to store the raw MIMIC-IV data
 export OUTPUT_TABULARIZATION_DIR=${ROOT_DIR}/meds_tab/ # set to the output directory for the tabularized data
 export OUTPUT_MODEL_DIR=${OUTPUT_TABULARIZATION_DIR}/results/ # set to the base results directory
 
-cd $MIMICIV_MEDS_DIR
+cd $MIMICIV_MEDS_COHORT_DIR
 gcloud storage cp gs://ehr_standardization_schema/MEDS_Extract_v0.0.7_test.zip meds_extract_0.0.7_data.zip
 unzip meds_extract_0.0.7_data.zip
 rm meds_extract_0.0.7_data.zip
@@ -38,7 +38,7 @@ Next we need to get some labels for our tasks. We will use the `long_los` and `i
 
 ```console
 TASKS=("long_los" "icu_mortality")
-TASKS_DIR="$MIMICIV_MEDS_DIR/tasks/" # set to the directory in which you want to store all tasks
+TASKS_DIR="$MIMICIV_MEDS_COHORT_DIR/tasks/" # set to the directory in which you want to store all tasks
 
 mkdir -p "${TASKS_DIR}" # create a directory for the task
 
@@ -50,7 +50,7 @@ done
 
 ### (Option 2) Extract MEDS data from scratch
 
-Follow the instructions in the [MEDS_transforms MIMICIV TUTORIAL](https://github.com/mmcdermott/MEDS_transforms/blob/main/MIMIC-IV_Example/README.md)
+Follow the instructions in the [MIMIC-IV MEDS Extraction ETL](https://github.com/mmcdermott/MIMIC_IV_MEDS) to extract all data into the MEDS format.
 
 ### (Option 2) Use ACES to extract labels using a task config definition:
 
@@ -72,13 +72,13 @@ TASKS=(
     "mortality/post_hospital_discharge/1y"
     "readmission/30d"
 )
-TASKS_DIR="$MIMICIV_MEDS_DIR/tasks/" # set to the directory in which you want to store all tasks
+TASKS_DIR="$MIMICIV_MEDS_COHORT_DIR/tasks/" # set to the directory in which you want to store all tasks
 
 for TASK_NAME in "${TASKS[@]}"; do
-    SINGLE_TASK_DIR="${MIMICIV_MEDS_DIR}/tasks/${TASK_NAME}"
+    SINGLE_TASK_DIR="${MIMICIV_MEDS_COHORT_DIR}/tasks/${TASK_NAME}"
     mkdir -p $SINGLE_TASK_DIR # create a directory for the task
     cp MIMICIV_TUTORIAL/tasks/${TASK_NAME}.yaml "${SINGLE_TASK_DIR}.yaml"
-    aces-cli --multirun hydra/launcher=joblib data=sharded data.standard=meds data.root="$MIMICIV_MEDS_DIR/data" "data.shard=$(expand_shards $MIMICIV_MEDS_DIR/data)" cohort_dir="$TASKS_DIR" cohort_name="$TASK_NAME"
+    aces-cli --multirun hydra/launcher=joblib data=sharded data.standard=meds data.root="$MIMICIV_MEDS_COHORT_DIR/data" "data.shard=$(expand_shards $MIMICIV_MEDS_COHORT_DIR/data)" cohort_dir="$TASKS_DIR" cohort_name="$TASK_NAME"
 done
 ```
 
@@ -88,7 +88,7 @@ done
 export N_PARALLEL_WORKERS=48 # Set number of workers
 export RESHARD_DIR=${ROOT_DIR}/reshareded_meds/ # set to directory to output reshareded meds data
 TASKS_STR=$(echo ${TASKS[@]} | tr ' ' ',')
-bash MIMICIV_TUTORIAL/tabularize_meds.sh "${MIMICIV_MEDS_DIR}" "$RESHARD_DIR" $OUTPUT_TABULARIZATION_DIR \
+bash MIMICIV_TUTORIAL/tabularize_meds.sh "${MIMICIV_MEDS_COHORT_DIR}" "$RESHARD_DIR" $OUTPUT_TABULARIZATION_DIR \
     "${TASKS_STR}" $TASKS_DIR $OUTPUT_MODEL_DIR $N_PARALLEL_WORKERS \
     "tabularization.aggs=[static/present,code/count,value/count,value/sum,value/sum_sqd,value/min,value/max]" \
     "tabularization.window_sizes=[2h,12h,1d,7d,30d,365d,full]"
